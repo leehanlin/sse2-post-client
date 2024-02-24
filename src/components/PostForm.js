@@ -4,24 +4,23 @@ import '../index.css'; // Import your CSS file
 
 const PostForm = () => {
     const [formData, setFormData] = useState({
-        categoryId: null, // Store category ID
-        categoryName: '', // Store category name
+        interestid: null, // Store interest ID
+        interestName: '', // Store interest name
         header: '',
         description: '',
-        tags: '',
         visibility: ''
     });
-    const [categories, setCategories] = useState([]);
+    const [interests, setInterests] = useState([]);
 
     useEffect(() => {
-        // Fetch categories from backend API
-        axios.get('http://localhost:8080/api/categories')
+        // Fetch interests from backend API
+        axios.get('http://127.0.0.1:3001/api/interests')
             .then(response => {
-                console.log('Categories:', response.data);
-                setCategories(response.data);
+                console.log('Interests:', response.data);
+                setInterests(response.data.interests);
             })
             .catch(error => {
-                console.error('Error fetching categories:', error);
+                console.error('Error fetching interests:', error);
             });
     }, []);
 
@@ -34,7 +33,7 @@ const PostForm = () => {
         e.preventDefault();
 
         // Check if any required field is empty
-        const requiredFields = ['categoryId', 'header', 'description', 'visibility'];
+        const requiredFields = ['interestid', 'header', 'description', 'visibility'];
         const emptyFields = requiredFields.filter(field => !formData[field]);
 
         if (emptyFields.length > 0) {
@@ -43,15 +42,19 @@ const PostForm = () => {
         }
 
         try {
-            await axios.post('http://localhost:8080/api/posts', formData);
+            // Hardcoded userId
+            const userId = "0001";
+
+            // Prepare data to send to the backend including userId
+            const dataToSend = { ...formData, userId };
+            await axios.post('http://localhost:8080/api/posts', dataToSend);
             alert('Post created successfully');
             // Clear form fields after successful submission
             setFormData({
-                categoryId: null,
-                categoryName: '',
+                interestid: null,
+                interestName: '',
                 header: '',
                 description: '',
-                tags: '',
                 visibility: ''
             });
         } catch (error) {
@@ -63,11 +66,11 @@ const PostForm = () => {
     return (
         <form className="form-container" onSubmit={handleSubmit}>
             <div>
-                <label htmlFor="category">Category:</label>
-                <select id="category" name="categoryId" value={formData.categoryId || ''} onChange={handleChange}>
-                    <option value="">Choose a category</option>
-                    {categories.map(category => (
-                        <option key={category.categoryId} value={category.categoryId}>{category.category}</option>
+                <label htmlFor="interest">Interest:</label>
+                <select id="interest" name="interestid" value={formData.interestid || ''} onChange={handleChange}>
+                    <option value="">Choose a interest</option>
+                    {interests.map(interest => (
+                        <option key={interest.interestid} value={interest.interestid}>{interest.interest}</option>
                     ))}
                 </select>
             </div>
@@ -78,10 +81,6 @@ const PostForm = () => {
             <div>
                 <label htmlFor="description">Description:</label>
                 <textarea id="description" name="description" value={formData.description} onChange={handleChange} />
-            </div>
-            <div>
-                <label htmlFor="tags">Tags:</label>
-                <input type="text" id="tags" name="tags" value={formData.tags} onChange={handleChange} />
             </div>
             <div>
                 <label htmlFor="visibility">Visibility:</label>
